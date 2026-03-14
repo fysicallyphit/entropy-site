@@ -1,6 +1,6 @@
 from src.extract import extract_qkv
 from src.compress import compute_svd
-from src.evaluate import compression_experiment
+from evaluate_r import compression_experiment
 from src.plot import plot_results
 
 outputs, Q_head, K_head, V_head = extract_qkv()

@@ -40,4 +40,5 @@ attention_error, compressed_KV_memory, full_KV_memory = sv_16(Q_head, K_head, V_
 print('Full rank memory (bytes)' , np.max(full_KV_memory) )
 print('Compressed memory (bytes): ' , compressed_KV_memory)
 print('Compression Ratio: ', full_KV_memory/(compressed_KV_memory))
-    
+print('Error: ', attention_error)
+
