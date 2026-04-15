@@ -3,31 +3,86 @@ import SpecsForm from './SpecsForm'
 import Report from './Report'
 import HPAWizard from './HPAWizard'
 
+const LOGO_SRC = "file:///Users/nat/.cursor/projects/Users-nat-Desktop-entropy-demos/assets/Entropy-29b1350e-0992-41d6-bb6b-4d071955126a.png"
+
 const STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0a0a0a;
-    color: #ededed;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0f172a 0%, #0b1120 45%, #020617 100%);
+    color: #e2e8f0;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 14px;
+    line-height: 1.45;
   }
-  .page { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
-  .wordmark { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; color: #fff; margin-bottom: 4px; }
-  .tagline { color: #555; font-size: 13px; margin-bottom: 32px; }
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid #1a1a1a; margin-bottom: 32px; }
-  .tab { padding: 10px 0; margin-right: 28px; font-size: 13px; color: #444; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; letter-spacing: 0.01em; }
-  .tab:hover { color: #888; }
-  .tab.active { color: #ededed; border-bottom-color: #fff; }
-  .card { background: #111; border: 1px solid #222; border-radius: 12px; padding: 28px; margin-bottom: 16px; }
-  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 20px; }
-  label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; margin-top: 16px; }
+  .page { max-width: 860px; margin: 0 auto; padding: 56px 24px 72px; }
+  .wordmark-logo { display: block; width: 220px; max-width: 100%; margin-bottom: 10px; filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.35)); }
+  .tagline { color: #94a3b8; font-size: 14px; margin-bottom: 28px; }
+  .tabs {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(6px);
+    margin-bottom: 24px;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.15s;
+    background: transparent;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+  }
+  .tab:hover { background: #1e293b; color: #f8fafc; }
+  .tab.active { color: #f8fafc; background: #334155; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2); }
+  .card {
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 16px;
+    box-shadow: 0 14px 30px rgba(2, 6, 23, 0.35);
+  }
+  .card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 22px; }
+  label { display: block; font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px; margin-top: 16px; }
   label:first-of-type { margin-top: 0; }
-  input, select { width: 100%; background: #0a0a0a; border: 1px solid #222; border-radius: 8px; color: #ededed; font-size: 14px; padding: 10px 12px; outline: none; appearance: none; transition: border-color 0.15s; }
-  input:focus, select:focus { border-color: #444; }
-  .btn { width: 100%; margin-top: 24px; padding: 12px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
-  .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .loading { text-align: center; color: #555; padding: 48px 0; font-size: 13px; }
+  input, select {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 14px;
+    padding: 11px 12px;
+    outline: none;
+    appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input::placeholder { color: #64748b; }
+  input:focus, select:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.28); }
+  .btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 12px;
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s, opacity 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(67, 56, 202, 0.3); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+  .loading { text-align: center; color: #94a3b8; padding: 48px 0 24px; font-size: 13px; }
   .dot { display: inline-block; animation: blink 1.4s infinite both; }
   .dot:nth-child(2) { animation-delay: 0.2s; }
   .dot:nth-child(3) { animation-delay: 0.4s; }
@@ -56,7 +111,7 @@ export default function App() {
     <>
       <style>{STYLES}</style>
       <div className="page">
-        <div className="wordmark">Entropy</div>
+        <img src={LOGO_SRC} alt="Entropy" className="wordmark-logo" />
         <div className="tagline">Data center heat reuse infrastructure</div>
 
         <div className="tabs">

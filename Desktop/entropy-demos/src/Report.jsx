@@ -1,6 +1,91 @@
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 
+const PREVIEW_STYLES = `
+  .report-preview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .report-preview-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .report-export-btn {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .report-export-btn:hover { border-color: #475569; background: #1e293b; }
+  .report-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .report-kpi-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .report-kpi-title { font-size: 11px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .report-kpi-value { font-size: 22px; font-weight: 700; color: #e2e8f0; letter-spacing: -0.5px; }
+  .report-kpi-unit { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .report-warning {
+    background: #3f2004;
+    border: 1px solid #9a3412;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .report-warning-title { font-size: 11px; color: #fdba74; letter-spacing: 0.1em; margin-bottom: 6px; font-weight: 700; }
+  .report-warning-body { font-size: 12px; color: #fed7aa; }
+  .report-compliance {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .report-compliance-title {
+    font-size: 10px;
+    color: #94a3b8;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .report-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .report-badge {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid;
+    font-weight: 600;
+  }
+  .report-badge.ok { border-color: #14532d; color: #bbf7d0; background: #052e16; }
+  .report-badge.warn { border-color: #9a3412; color: #fdba74; background: #431407; }
+  .report-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    padding: 16px 0;
+  }
+`
+
 const REPORT_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -569,77 +654,60 @@ const handleExport = async () => {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <span style={{ fontSize: 11, color: "#555", textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>
+      <style>{PREVIEW_STYLES}</style>
+      <div className="report-preview-head">
+        <span className="report-preview-label">
           Techno-Economic Analysis
         </span>
-        <button
-          onClick={handleExport}
-          style={{
-            background: "transparent",
-            border: "1px solid #222",
-            color: "#888",
-            borderRadius: 6,
-            padding: "7px 14px",
-            fontSize: 11,
-            fontFamily: "monospace",
-            letterSpacing: "0.08em",
-            cursor: "pointer",
-          }}
-        >
+        <button onClick={handleExport} className="report-export-btn">
           EXPORT REPORT →
         </button>
       </div>
 
-      {/* inline preview cards — unchanged from before */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 16 }}>
+      <div className="report-kpi-grid">
         {[
           ["Payback", f.simple_payback_years, "years"],
           ["Revenue", fmt(f.annual_heat_revenue), `${cur}/yr`],
           ["CO₂", fmt(f.tonnes_co2_displaced_annual), "t/yr"],
         ].map(([label, val, unit]) => (
-          <div key={label} style={{ background: "#0d1f16", border: "1px solid #1a3a2a", borderRadius: 10, padding: 16 }}>
-            <div style={{ fontSize: 11, color: "#555", marginBottom: 6, fontFamily: "monospace" }}>{label}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "#4ade80", letterSpacing: -0.5 }}>{val}</div>
-            <div style={{ fontSize: 11, color: "#555", marginTop: 2, fontFamily: "monospace" }}>{unit}</div>
+          <div key={label} className="report-kpi-card">
+            <div className="report-kpi-title">{label}</div>
+            <div className="report-kpi-value">{val}</div>
+            <div className="report-kpi-unit">{unit}</div>
           </div>
         ))}
       </div>
 
       {p.heat_pump_required && (
-        <div style={{ background: "#0d0a04", border: "1px solid #3a2a0a", borderRadius: 8, padding: 14, marginBottom: 16 }}>
-          <div style={{ fontSize: 11, color: "#f0c878", fontFamily: "monospace", letterSpacing: "0.1em", marginBottom: 6 }}>
+        <div className="report-warning">
+          <div className="report-warning-title">
             ⚠ HEAT PUMP REQUIRED
           </div>
-          <div style={{ fontSize: 12, color: "#555" }}>
+          <div className="report-warning-body">
             Output {p.output_temp_c}°C is below buyer requirement ({p.buyer_inlet_required_c}°C).
             COP {p.heat_pump_cop} — adds {cur} {fmt(f.heat_pump_capex)} CAPEX.
           </div>
         </div>
       )}
 
-      <div style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 10, padding: 20, marginBottom: 12 }}>
-        <div style={{ fontSize: 10, color: "#333", fontFamily: "monospace", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 16 }}>
+      <div className="report-compliance">
+        <div className="report-compliance-title">
           Compliance
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div className="report-badges">
           {[
             [c.eu_eed_target_met ? "ERF ✓" : "ERF ✗", `${p.erf_pct}`, c.eu_eed_target_met],
             ["EU EED", c.eu_eed_target_met ? "compliant" : "below target", c.eu_eed_target_met],
             ["WUE", c.wue_impact, true],
           ].map(([label, val, ok]) => (
-            <div key={label} style={{
-              fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em",
-              padding: "4px 10px", border: `1px solid ${ok ? "#1a3a0a" : "#3a1a0a"}`,
-              color: ok ? "#4a8a2a" : "#8a4a2a", borderRadius: 4
-            }}>
+            <div key={label} className={`report-badge ${ok ? "ok" : "warn"}`}>
               {label} — {val}
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ fontSize: 12, color: "#333", fontFamily: "monospace", textAlign: "center", padding: "16px 0" }}>
+      <div className="report-hint">
         Click EXPORT REPORT → for the full formatted document
       </div>
     </div>

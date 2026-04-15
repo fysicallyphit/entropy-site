@@ -14,7 +14,7 @@ const BUYER_TYPES = {
   sweden:      ["district_heating"],
 }
 
-export default function SpecsForm({ onSubmit }) {
+export default function SpecsForm({ onSubmit, loading }) {
   const [specs, setSpecs] = useState({
     user_type: "data_center",
     jurisdiction: "germany",
@@ -24,8 +24,6 @@ export default function SpecsForm({ onSubmit }) {
     heat_buyer_type: "district_heating",
     capex: null,
   })
-
-  const [loading, setLoading] = useState(false)
 
   const update = (field, value) =>
     setSpecs(prev => ({ ...prev, [field]: value }))
@@ -40,15 +38,11 @@ export default function SpecsForm({ onSubmit }) {
       alert("Please fill in IT load and PUE")
       return
     }
-    setLoading(true)
     await onSubmit(specs)
-    setLoading(false)
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: "40px auto", fontFamily: "sans-serif" }}>
-      <h2>Entropy — Techno-Economic Analysis</h2>
-
+    <div>
       <label>User Type</label>
       <select value={specs.user_type} onChange={e => update("user_type", e.target.value)}>
         {USER_TYPES.map(u => (

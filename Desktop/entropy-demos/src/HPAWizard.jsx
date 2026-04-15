@@ -15,47 +15,52 @@ const HEAT_BUYER_TYPES = ["district_heating", "industrial", "greenhouse_horticul
 
 const FIELD_STYLES = `
   .wiz-field { margin-bottom: 20px; }
-  .wiz-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
-  .wiz-input { width: 100%; background: #0a0a0a; border: 1px solid #222; border-radius: 8px; color: #ededed; font-size: 14px; padding: 10px 12px; outline: none; appearance: none; transition: border-color 0.15s; font-family: inherit; }
-  .wiz-input:focus { border-color: #444; }
+  .wiz-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
+  .wiz-input { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #e2e8f0; font-size: 14px; padding: 11px 12px; outline: none; appearance: none; transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit; }
+  .wiz-input:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.28); }
   .wiz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .wiz-hint { font-size: 11px; color: #444; margin-top: 5px; }
-  .wiz-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #1a1a1a; }
+  .wiz-hint { font-size: 11px; color: #64748b; margin-top: 5px; }
+  .wiz-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #1e293b; }
   .wiz-nav { display: flex; gap: 10px; margin-top: 28px; }
-  .wiz-btn-back { flex: 1; padding: 11px; background: transparent; color: #555; border: 1px solid #222; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; }
-  .wiz-btn-back:hover { border-color: #444; color: #ededed; }
-  .wiz-btn-next { flex: 2; padding: 11px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
-  .wiz-btn-next:hover { opacity: 0.85; }
+  .wiz-btn-back { flex: 1; padding: 11px; background: #0f172a; color: #cbd5e1; border: 1px solid #334155; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .wiz-btn-back:hover { border-color: #475569; background: #1e293b; }
+  .wiz-btn-next { flex: 2; padding: 11px; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, opacity 0.15s; font-family: inherit; }
+  .wiz-btn-next:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(67, 56, 202, 0.3); }
   .wiz-btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
   .wiz-stepper { display: flex; gap: 0; margin-bottom: 32px; }
-  .wiz-step { flex: 1; display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 2px solid #1a1a1a; transition: border-color 0.2s; }
-  .wiz-step.active { border-color: #fff; }
-  .wiz-step.done { border-color: #333; }
-  .wiz-step-num { font-size: 10px; color: #333; font-weight: 600; letter-spacing: 0.05em; }
-  .wiz-step.active .wiz-step-num { color: #fff; }
-  .wiz-step.done .wiz-step-num { color: #555; }
-  .wiz-step-label { font-size: 10px; color: #333; letter-spacing: 0.03em; }
-  .wiz-step.active .wiz-step-label { color: #ededed; }
-  .wiz-step.done .wiz-step-label { color: #555; }
-  .review-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+  .wiz-step { flex: 1; display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; border-bottom: 2px solid #1e293b; transition: border-color 0.2s; }
+  .wiz-step.active { border-color: #818cf8; }
+  .wiz-step.done { border-color: #475569; }
+  .wiz-step-num { font-size: 10px; color: #64748b; font-weight: 700; letter-spacing: 0.05em; }
+  .wiz-step.active .wiz-step-num { color: #818cf8; }
+  .wiz-step.done .wiz-step-num { color: #94a3b8; }
+  .wiz-step-label { font-size: 10px; color: #64748b; letter-spacing: 0.03em; }
+  .wiz-step.active .wiz-step-label { color: #e2e8f0; }
+  .wiz-step.done .wiz-step-label { color: #94a3b8; }
+  .review-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid #1e293b; }
   .review-row:last-child { border-bottom: none; }
-  .review-key { font-size: 12px; color: #555; }
-  .review-val { font-size: 13px; color: #ededed; font-weight: 500; }
+  .review-key { font-size: 12px; color: #94a3b8; }
+  .review-val { font-size: 13px; color: #e2e8f0; font-weight: 600; }
   .review-group { margin-bottom: 24px; }
-  .review-group-title { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #333; margin-bottom: 4px; }
-  .term-sheet { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 10px; padding: 28px; margin-top: 4px; }
-  .term-sheet-text { font-size: 13px; color: #aaa; line-height: 1.8; white-space: pre-wrap; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .review-group-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+  .term-sheet { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 28px; margin-top: 4px; }
+  .term-sheet-text { font-size: 13px; color: #cbd5e1; line-height: 1.8; white-space: pre-wrap; font-family: "SF Mono", "Fira Code", monospace; }
   .term-sheet-actions { display: flex; gap: 10px; margin-top: 20px; }
-  .ts-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; letter-spacing: 0.03em; }
-  .ts-btn-copy { background: transparent; border: 1px solid #222; color: #888; }
-  .ts-btn-copy:hover { border-color: #444; color: #ededed; }
-  .ts-btn-new { background: #fff; border: none; color: #000; }
-  .ts-btn-new:hover { opacity: 0.85; }
+  .ts-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; letter-spacing: 0.03em; }
+  .ts-btn-copy { background: #0f172a; border: 1px solid #334155; color: #cbd5e1; }
+  .ts-btn-copy:hover { border-color: #475569; background: #1e293b; }
+  .ts-btn-new { background: linear-gradient(135deg, #4f46e5, #4338ca); border: none; color: #ffffff; }
+  .ts-btn-new:hover { opacity: 0.9; }
   .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-  .metric-cell { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 8px; padding: 14px; }
-  .metric-label { font-size: 10px; color: #444; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
-  .metric-value { font-size: 18px; font-weight: 600; color: #ededed; letter-spacing: -0.5px; }
-  .metric-sub { font-size: 11px; color: #555; margin-top: 2px; }
+  .metric-cell { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
+  .metric-label { font-size: 10px; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+  .metric-value { font-size: 18px; font-weight: 700; color: #e2e8f0; letter-spacing: -0.5px; }
+  .metric-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .wiz-note { background: #172554; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+  .wiz-note-text { font-size: 12px; color: #cbd5e1; line-height: 1.7; }
+  .wiz-inline-hint { margin-top: -10px; margin-bottom: 16px; }
+  .wiz-subhint { margin-bottom: 6px; }
+  .wiz-error { font-size: 12px; color: #dc2626; margin-top: 12px; }
 `
 
 function Field({ label, hint, children }) {
@@ -132,7 +137,7 @@ function StepCapacity({ data, set }) {
       <Field label="Availability Guarantee (%)" hint="Minimum % of hours per year heat must be available">
         <Input type="number" value={data.availability_guarantee_pct} onChange={v => set("availability_guarantee_pct", v)} placeholder="95" min="50" max="100" />
       </Field>
-      <div className="wiz-hint" style={{ marginTop: -10, marginBottom: 16 }}>
+      <div className="wiz-hint wiz-inline-hint">
         At {data.availability_guarantee_pct}% availability — guaranteed minimum {Math.round(data.contracted_capacity_mw * (data.availability_guarantee_pct / 100) * 8760).toLocaleString()} MWh/year
       </div>
     </>
@@ -154,11 +159,11 @@ function StepPricing({ data, set }) {
       <Field label="Price Collar" hint="Floor and ceiling applied to base heat price to protect both parties">
         <div className="wiz-row">
           <div>
-            <div className="wiz-hint" style={{ marginBottom: 6 }}>Floor (% of base)</div>
+            <div className="wiz-hint wiz-subhint">Floor (% of base)</div>
             <Input type="number" value={data.collar_floor_pct} onChange={v => set("collar_floor_pct", v)} placeholder="80" min="50" max="100" />
           </div>
           <div>
-            <div className="wiz-hint" style={{ marginBottom: 6 }}>Ceiling (% of base)</div>
+            <div className="wiz-hint wiz-subhint">Ceiling (% of base)</div>
             <Input type="number" value={data.collar_ceiling_pct} onChange={v => set("collar_ceiling_pct", v)} placeholder="120" min="100" max="200" />
           </div>
         </div>
@@ -174,8 +179,8 @@ function StepShortfall({ data, set }) {
   return (
     <>
       <div className="wiz-section-title">Shortfall Payment Mechanism</div>
-      <div style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 8, padding: "14px 16px", marginBottom: 20 }}>
-        <div style={{ fontSize: 11, color: "#555", lineHeight: 1.7 }}>
+      <div className="wiz-note">
+        <div className="wiz-note-text">
           If the Seller delivers less than the contracted capacity in any calendar month, the Seller pays the Buyer the cost of sourcing the shortfall from the market — at TTF spot + distribution markup. No penalty. No adversarial trigger.
         </div>
       </div>
@@ -280,7 +285,7 @@ function TermSheet({ result, onReset }) {
 
   return (
     <>
-      <div className="wiz-section-title" style={{ marginBottom: 20 }}>Indicative Term Sheet</div>
+      <div className="wiz-section-title">Indicative Term Sheet</div>
 
       <div className="metrics-grid">
         <div className="metric-cell">
@@ -421,7 +426,7 @@ export default function HPAWizard() {
           {stepComponents[step]}
 
           {/* Error */}
-          {error && <div style={{ fontSize: 12, color: "#f55", marginTop: 12 }}>{error}</div>}
+          {error && <div className="wiz-error">{error}</div>}
 
           {/* Nav */}
           <div className="wiz-nav">

@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from openai import OpenAI
 import json
 
@@ -31,6 +34,10 @@ SEASONAL_LOAD_FACTORS = {
     "aquaculture": 0.88,
 }
 
+# Blended installed cost per metre of DN200 pre-insulated district heating pipe
+# Includes pipe, fittings, civil works, backfill. Source: CIBSE CP1 2021, Euroheat & Power 2023
+PIPE_COST_PER_METRE = 1000  # EUR/m
+
 JURISDICTION_CONFIG = {
     "germany": {
         "heat_prices": {
@@ -39,7 +46,7 @@ JURISDICTION_CONFIG = {
         },
         "carbon_credit_price": 65,
         "carbon_intensity": 0.380,
-        "electricity_price": 0.18,  # €/kWh — needed for heat pump OPEX
+        "electricity_price": 0.18,
         "incentives": [
             {
                 "name": "BAFA Bundesförderung Effiziente Wärmenetze (BEW)",
@@ -158,6 +165,7 @@ The following calculations have already been performed using verified physical f
 
 Be specific. Do not invent numbers — only use what is provided below.
 If a heat pump is required, explain why and what it means for the economics.
+If pipe infrastructure cost is included, mention it as a component of total CAPEX.
 
 --- INPUT SPECIFICATIONS ---
 {specs_json}
@@ -202,7 +210,7 @@ def calculate_physics(specs: dict) -> dict:
     # ERF — EU Energy Efficiency Directive metric
     erf = recoverable_heat_kw / it_load_kw
 
-    # Seasonal correction — buyer demand isn't flat year-round
+    # Seasonal correction
     seasonal_factor = SEASONAL_LOAD_FACTORS.get(buyer_type, 0.95)
     annual_heat_mwh_raw = (recoverable_heat_kw / 1000) * 8760 * 0.95
     annual_heat_mwh = annual_heat_mwh_raw * seasonal_factor
@@ -218,28 +226,24 @@ def calculate_physics(specs: dict) -> dict:
 
     if heat_pump_required:
         temp_lift = buyer_inlet_required - output_temp_c
-        # COP degrades ~0.05 per °C of temperature lift from a base of 4.5
         heat_pump_cop = max(1.5, 4.5 - (temp_lift * 0.05))
-        heat_pump_capex = recoverable_heat_kw * 400  # £/€ per kW installed
-        # Electricity consumed by heat pump to deliver annual_heat_mwh
+        heat_pump_capex = recoverable_heat_kw * 400
         heat_pump_electricity_mwh = annual_heat_mwh / heat_pump_cop
-        heat_pump_annual_opex = (
-            heat_pump_electricity_mwh * 1000 * config["electricity_price"]
-        )
+        heat_pump_annual_opex = heat_pump_electricity_mwh * 1000 * config["electricity_price"]
 
     # --- Revenue ---
     heat_price = config["heat_prices"][buyer_type]
     annual_heat_revenue = annual_heat_mwh * heat_price
 
     # --- Carbon credits ---
-    tonnes_co2_displaced = (
-        annual_heat_mwh * 1000 * config["carbon_intensity"]
-    ) / 1000
+    tonnes_co2_displaced = (annual_heat_mwh * 1000 * config["carbon_intensity"]) / 1000
     annual_carbon_credit = tonnes_co2_displaced * config["carbon_credit_price"]
 
     # --- CAPEX ---
-    hex_capex = specs.get("capex") or (recoverable_heat_kw * 200)  # heat exchanger
-    gross_capex = hex_capex + heat_pump_capex
+    hex_capex = specs.get("capex") or (recoverable_heat_kw * 200)
+    pipe_distance_m = specs.get("pipe_distance_m") or 0
+    pipe_capex = pipe_distance_m * PIPE_COST_PER_METRE
+    gross_capex = hex_capex + heat_pump_capex + pipe_capex
 
     grants = [i for i in config["incentives"] if i["type"] == "grant"]
     total_grant_pct = sum(g.get("value_pct_capex", 0) for g in grants)
@@ -279,6 +283,8 @@ def calculate_physics(specs: dict) -> dict:
             "annual_carbon_credit": round(annual_carbon_credit, 0),
             "hex_capex": round(hex_capex, 0),
             "heat_pump_capex": round(heat_pump_capex, 0),
+            "pipe_distance_m": pipe_distance_m,
+            "pipe_capex": round(pipe_capex, 0),
             "gross_capex": round(gross_capex, 0),
             "grant_value": round(grant_value, 0),
             "net_capex": round(net_capex, 0),
@@ -307,6 +313,7 @@ def calculate_physics(specs: dict) -> dict:
             "carbon_intensity": "DESNZ / EEA national grid intensity figures 2024",
             "carbon_credit_price": "EU ETS + national voluntary markets Q1 2025",
             "capex_benchmark": "CIBSE Heat Networks Code of Practice 2021: £150-250/kW HEX, £350-450/kW heat pump",
+            "pipe_cost_benchmark": "CIBSE CP1 2021, Euroheat & Power 2023: EUR 800-1,200/m installed DN200",
             "heat_pump_cop": "Carnot-derived COP with 0.05 degradation per °C temperature lift",
             "seasonal_factors": "Eurostat district heating demand profiles 2023",
             "erf": "EU Energy Efficiency Directive Article 24, recast 2023",
@@ -343,29 +350,8 @@ def generate_tea_report(specs: dict) -> dict:
 
 
 if __name__ == "__main__":
-    # Test case 1: air-cooled selling to district heating — heat pump required
-    print("=== Test 1: Air-cooled → district heating (heat pump required) ===")
-    specs_1 = {
-        "user_type": "data_center",
-        "it_load_mw": 10,
-        "pue": 1.5,
-        "cooling_type": "air_cooled",
-        "heat_buyer_type": "district_heating",
-        "jurisdiction": "germany",
-        "capex": None,
-    }
-    result_1 = generate_tea_report(specs_1)
-    f = result_1["calculated"]["financials"]
-    p = result_1["calculated"]["physics"]
-    print(f"Heat pump required: {p['heat_pump_required']}")
-    print(f"COP: {p['heat_pump_cop']}, temp lift: {p['temp_lift_c']}°C")
-    print(f"Payback: {f['simple_payback_years']} years")
-    print(f"ERF: {p['erf_pct']}")
-    print()
-
-    # Test case 2: immersion → district heating — no heat pump needed
-    print("=== Test 2: Immersion → district heating (no heat pump) ===")
-    specs_2 = {
+    print("=== Test: immersion → district heating, 300m pipe run ===")
+    specs = {
         "user_type": "data_center",
         "it_load_mw": 10,
         "pue": 1.4,
@@ -373,16 +359,11 @@ if __name__ == "__main__":
         "heat_buyer_type": "district_heating",
         "jurisdiction": "germany",
         "capex": None,
+        "pipe_distance_m": 300,
     }
-    result_2 = generate_tea_report(specs_2)
-    f2 = result_2["calculated"]["financials"]
-    p2 = result_2["calculated"]["physics"]
-    print(f"Heat pump required: {p2['heat_pump_required']}")
-    print(f"Payback: {f2['simple_payback_years']} years")
-    print(f"ERF: {p2['erf_pct']}")
-
-    with open("tea_calculated.json", "w") as f_out:
-        json.dump(result_2["calculated"], f_out, indent=2)
-
-    with open("tea_narrative.txt", "w") as f_out:
-        f_out.write(result_2["narrative"])
+    result = generate_tea_report(specs)
+    f = result["calculated"]["financials"]
+    print(f"Pipe CAPEX: EUR {f['pipe_capex']:,} ({f['pipe_distance_m']}m)")
+    print(f"Gross CAPEX: EUR {f['gross_capex']:,}")
+    print(f"Net CAPEX (after grants): EUR {f['net_capex']:,}")
+    print(f"Payback: {f['simple_payback_years']} years")

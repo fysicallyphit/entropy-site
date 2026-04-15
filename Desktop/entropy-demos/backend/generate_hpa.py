@@ -5,14 +5,16 @@ import json
 
 client = OpenAI()
 
-# TTF gas index markup per jurisdiction (EUR/MWh added to TTF spot for shortfall reference price)
-# Represents distribution cost + margin a heat buyer would pay to source heat elsewhere
+# Blended installed cost per metre of DN200 pre-insulated district heating pipe
+# Includes pipe, fittings, civil works, backfill. Source: CIBSE CP1 2021, Euroheat & Power 2023
+PIPE_COST_PER_METRE = 1000  # EUR/m
+
 HPA_JURISDICTION_CONFIG = {
     "germany": {
         "currency": "EUR",
-        "base_heat_price_mwh": 55,           # EUR/MWh — district heating benchmark
-        "ttf_distribution_markup": 18,        # EUR/MWh on top of TTF spot for shortfall calc
-        "capacity_charge_mw_year": 28000,     # EUR/MW/year — fixed availability charge
+        "base_heat_price_mwh": 55,
+        "ttf_distribution_markup": 18,
+        "capacity_charge_mw_year": 28000,
         "regulatory": {
             "framework": "EU Energy Efficiency Directive (EED) Article 24 — waste heat recovery obligation for facilities >1MW",
             "national": "Gebäudeenergiegesetz (GEG) 2024 — municipal heat planning mandates",
@@ -44,7 +46,7 @@ HPA_JURISDICTION_CONFIG = {
     "uk": {
         "currency": "GBP",
         "base_heat_price_mwh": 45,
-        "ttf_distribution_markup": 20,        # NBP-indexed, converted to TTF-equivalent
+        "ttf_distribution_markup": 20,
         "capacity_charge_mw_year": 22000,
         "regulatory": {
             "framework": "Heat Networks (Scotland) Act 2021 / England & Wales Heat Network Zoning (2025)",
@@ -80,10 +82,6 @@ COOLING_TYPE_DELIVERY_TEMPS = {
 
 
 def calculate_hpa_terms(specs: dict) -> dict:
-    """
-    Pure commercial math — no AI.
-    Derives all HPA term sheet numbers from wizard inputs.
-    """
     jurisdiction = specs["jurisdiction"]
     assert jurisdiction in HPA_JURISDICTION_CONFIG, f"Unsupported jurisdiction: {jurisdiction}"
 
@@ -93,7 +91,7 @@ def calculate_hpa_terms(specs: dict) -> dict:
     availability_pct = specs["availability_guarantee_pct"] / 100
     term_years = specs["term_years"]
     cooling_type = specs["cooling_type"]
-    ttf_spot = specs["ttf_spot_eur_mwh"]  # caller passes in current TTF spot price
+    ttf_spot = specs["ttf_spot_eur_mwh"]
 
     assert contracted_capacity_mw > 0
     assert 0.5 <= availability_pct <= 1.0, "Availability guarantee must be 50–100%"
@@ -103,32 +101,36 @@ def calculate_hpa_terms(specs: dict) -> dict:
     guaranteed_min_mwh_year = contracted_capacity_mw * availability_pct * 8760
     max_annual_mwh = contracted_capacity_mw * 8760
 
-    # Pricing structure
-    base_price = config["base_heat_price_mwh"]                    # EUR/MWh usage charge
-    collar_floor = round(base_price * 0.80, 2)                    # 80% floor
-    collar_ceiling = round(base_price * 1.20, 2)                  # 120% ceiling
-    capacity_charge_year = config["capacity_charge_mw_year"] * contracted_capacity_mw  # EUR/year
+    # Pricing
+    base_price = config["base_heat_price_mwh"]
+    collar_floor = round(base_price * 0.80, 2)
+    collar_ceiling = round(base_price * 1.20, 2)
+    capacity_charge_year = config["capacity_charge_mw_year"] * contracted_capacity_mw
 
-    # Shortfall payment rate — what buyer pays to source heat elsewhere (TTF + markup)
-    shortfall_rate = ttf_spot + config["ttf_distribution_markup"]  # EUR/MWh
+    # Shortfall
+    shortfall_rate = ttf_spot + config["ttf_distribution_markup"]
 
-    # Annual financials (base case — full availability)
+    # Revenue
     annual_usage_revenue = guaranteed_min_mwh_year * base_price
     annual_total_revenue = capacity_charge_year + annual_usage_revenue
-    total_contract_value = annual_total_revenue * term_years       # undiscounted headline
+    total_contract_value = annual_total_revenue * term_years
 
-    # Shortfall exposure — max liability if DC delivers 0 heat in a month
+    # Shortfall exposure
     max_monthly_shortfall_mwh = (contracted_capacity_mw * 8760) / 12
     max_monthly_shortfall_payment = max_monthly_shortfall_mwh * shortfall_rate
 
-    # Indexation — base price escalates with CPI assumption
+    # Indexation
     cpi_assumption_pct = 2.5
     price_year_10 = round(base_price * ((1 + cpi_assumption_pct / 100) ** 10), 2)
     price_year_20 = round(base_price * ((1 + cpi_assumption_pct / 100) ** 20), 2)
 
     # Delivery specs
     delivery_temp_c = COOLING_TYPE_DELIVERY_TEMPS[cooling_type]
-    min_delivery_temp_c = delivery_temp_c - 5  # 5°C tolerance band
+    min_delivery_temp_c = delivery_temp_c - 5
+
+    # Pipe infrastructure — Seller capital obligation, disclosed in term sheet
+    pipe_distance_m = specs.get("pipe_distance_m") or 0
+    pipe_capex = pipe_distance_m * PIPE_COST_PER_METRE
 
     return {
         "inputs": specs,
@@ -163,13 +165,19 @@ def calculate_hpa_terms(specs: dict) -> dict:
             "max_monthly_shortfall_mwh": round(max_monthly_shortfall_mwh, 0),
             "max_monthly_shortfall_payment": round(max_monthly_shortfall_payment, 0),
             "measurement_period": "Calendar month",
-            "cure_period_days": 30,
+            "cure_period_days": specs.get("cure_period_days", 30),
         },
         "term": {
             "duration_years": term_years,
             "renewal_option_years": specs.get("renewal_option_years", 5),
             "break_clause_year": specs.get("break_clause_year", None),
             "seller_step_in_rights": True,
+        },
+        "infrastructure": {
+            "pipe_distance_m": pipe_distance_m,
+            "pipe_capex": round(pipe_capex, 0),
+            "pipe_cost_basis": f"{PIPE_COST_PER_METRE} EUR/m blended installed (DN200)",
+            "note": "Pipe infrastructure cost is a Seller capital obligation and does not affect heat price.",
         },
         "financials": {
             "annual_capacity_revenue": round(capacity_charge_year, 0),
@@ -182,6 +190,7 @@ def calculate_hpa_terms(specs: dict) -> dict:
             "heat_price_benchmark": "BEIS/Ofgem 2023, BMWK 2024, RVO 2024, Energistyrelsen 2024",
             "shortfall_index": "TTF Natural Gas front-month (ICE), distribution markup per CIBSE Heat Networks CoP 2021",
             "capacity_charge_benchmark": "Euroheat & Power District Heating Price Survey 2023",
+            "pipe_cost_benchmark": "CIBSE CP1 2021, Euroheat & Power 2023: EUR 800-1,200/m installed DN200",
             "eed_reference": "EU Energy Efficiency Directive 2023/1791, Article 24",
         }
     }
@@ -231,6 +240,7 @@ HEAT PURCHASING AGREEMENT — INDICATIVE TERM SHEET
 
 9. INDICATIVE CONTRACT VALUE
    [Annual revenue, total undiscounted contract value, lender headline metrics]
+   If pipe infrastructure is included, state it as a Seller capital obligation separate from the payment structure.
 
 10. CONDITIONS PRECEDENT & NEXT STEPS
     [What must happen before execution]
@@ -240,9 +250,6 @@ End with: "This term sheet is indicative only and does not constitute a binding 
 
 
 def generate_hpa_report(specs: dict) -> dict:
-    """
-    Calculates terms then calls GPT-4o to generate the term sheet narrative.
-    """
     calculated = calculate_hpa_terms(specs)
 
     response = client.chat.completions.create(
@@ -274,7 +281,8 @@ if __name__ == "__main__":
         "term_years": 15,
         "renewal_option_years": 5,
         "break_clause_year": None,
-        "ttf_spot_eur_mwh": 38,              # caller should pass live TTF price
+        "ttf_spot_eur_mwh": 38,
+        "pipe_distance_m": 300,
         "seller_name": "Example Data Centre GmbH",
         "buyer_name": "Stadtwerke Musterstadt",
     }
@@ -288,7 +296,8 @@ if __name__ == "__main__":
         f.write(result["narrative"])
 
     financials = result["calculated"]["financials"]
+    infra = result["calculated"]["infrastructure"]
     currency = result["calculated"]["parties"]["currency"]
     print(f"Annual revenue: {currency} {financials['annual_total_revenue']:,}")
     print(f"Total contract value: {currency} {financials['total_contract_value_undiscounted']:,}")
-    print(f"Max monthly shortfall payment: {currency} {result['calculated']['shortfall']['max_monthly_shortfall_payment']:,}")
+    print(f"Pipe CAPEX (Seller obligation): {currency} {infra['pipe_capex']:,} ({infra['pipe_distance_m']}m)")
