@@ -290,6 +290,35 @@ button[type="submit"]:hover {
   letter-spacing: 0.18em;
 }
 
+/* CONTACT ACTIONS */
+.contact-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.btn-calendly {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.85rem 2rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, letter-spacing 0.2s;
+}
+
+.btn-calendly:hover {
+  background: var(--bg-raised);
+  letter-spacing: 0.18em;
+}
+
 /* FOOTER */
 footer {
   border-top: 1px solid var(--border-sub);
