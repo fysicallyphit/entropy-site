@@ -1,1 +1,0 @@
-generate a list of all the math calculations for the HPA and the TEA
