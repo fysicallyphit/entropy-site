@@ -53,7 +53,7 @@ nav {
 .nav-logo {
   font-family: 'JetBrains Mono', monospace;
   width: 15%;
-  margin-top: 10px;
+  margin-top: 20px;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--text);
@@ -307,7 +307,7 @@ button[type="submit"]:hover {
   text-transform: uppercase;
   color: var(--text);
   background: transparent;
-  border: 1px solid var(--border);
+  border: 0.5px solid red ;
   padding: 0.85rem 2rem;
   text-decoration: none;
   cursor: pointer;
