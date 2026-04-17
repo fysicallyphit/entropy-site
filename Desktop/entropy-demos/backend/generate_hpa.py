@@ -1,9 +1,13 @@
 from dotenv import load_dotenv
 load_dotenv()
 from openai import OpenAI
+import os
 import json
 
-client = OpenAI()
+client = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=os.environ["GROQ_API_KEY"],
+)
 
 # Blended installed cost per metre of DN200 pre-insulated district heating pipe
 # Includes pipe, fittings, civil works, backfill. Source: CIBSE CP1 2021, Euroheat & Power 2023
@@ -253,7 +257,7 @@ def generate_hpa_report(specs: dict) -> dict:
     calculated = calculate_hpa_terms(specs)
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="llama-3.3-70b-versatile",
         temperature=0,
         messages=[{
             "role": "user",

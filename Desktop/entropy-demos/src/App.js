@@ -3,19 +3,27 @@ import SpecsForm from './SpecsForm'
 import Report from './Report'
 import HPAWizard from './HPAWizard'
 
-const LOGO_SRC = "file:///Users/nat/.cursor/projects/Users-nat-Desktop-entropy-demos/assets/Entropy-29b1350e-0992-41d6-bb6b-4d071955126a.png"
+const logo_src = require('./Entropy_Dark_Logo.png'); // with require
 
 const STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    background: #020617;
+    overscroll-behavior: none;
+  }
   body {
     background: radial-gradient(circle at top, #0f172a 0%, #0b1120 45%, #020617 100%);
     color: #e2e8f0;
     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 14px;
     line-height: 1.45;
+    overscroll-behavior: none;
   }
+  .logo1{
+  width: 15%
+}
   .page { max-width: 860px; margin: 0 auto; padding: 56px 24px 72px; }
-  .wordmark-logo { display: block; width: 220px; max-width: 100%; margin-bottom: 10px; filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.35)); }
+  .wordmark-logo { display: block; width: 220px; max-width: 100%; margin-bottom: 10px; filter: invert(1); }
   .tagline { color: #94a3b8; font-size: 14px; margin-bottom: 28px; }
   .tabs {
     display: inline-flex;
@@ -106,12 +114,11 @@ export default function App() {
     setResult(data)
     setLoading(false)
   }
-
   return (
     <>
       <style>{STYLES}</style>
       <div className="page">
-        <img src={LOGO_SRC} alt="Entropy" className="wordmark-logo" />
+        <img className = "logo1" alt = "" src={logo_src}/>
         <div className="tagline">Data center heat reuse infrastructure</div>
 
         <div className="tabs">

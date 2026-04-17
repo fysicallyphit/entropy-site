@@ -91,105 +91,100 @@ const REPORT_STYLES = `
 
   body {
     background: #ffffff;
-    color: #000000;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 13px;
-    line-height: 1.6;
+    color: #111827;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 12.5px;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
   }
 
-  .page {
-    max-width: 650px;
+  /* Fixed-size page container for reliable PDF rendering */
+  .pdf-page {
+    width: 794px;
+    min-height: 1123px;
     margin: 0 auto;
-    padding: 48px 24px;
+    padding: 54px 54px 56px;
+    background: #ffffff;
   }
+  .pdf-page + .pdf-page { page-break-before: always; }
+  .avoid-break { break-inside: avoid; page-break-inside: avoid; }
 
   /* ---- header ---- */
   .report-header {
-    border-bottom: 1px solid #2a2a2a;
-    padding-bottom: 32px;
-    margin-bottom: 40px;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
   }
 
   .entropy-mark {
-    font-family: 'Courier New', monospace;
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #000000;
-    margin-bottom: 28px;
+    color: #374151;
+    margin-bottom: 14px;
   }
 
   .report-title {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: normal;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    color: #000000;
-    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+    line-height: 1.25;
+    color: #111827;
+    margin-bottom: 10px;
   }
 
   .report-subtitle {
-    font-family: 'Courier New', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #000000;
+    font-size: 11px;
+    color: #374151;
   }
 
   /* ---- section ---- */
   .section {
-    margin-bottom: 40px;
+    margin-bottom: 22px;
   }
 
   .section-label {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.25em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #000000;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #706f6f;
+    color: #111827;
+    margin-bottom: 10px;
   }
 
   /* ---- KPI strip ---- */
   .kpi-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-    margin-bottom: 40px;
+    gap: 12px;
+    margin: 18px 0 18px;
   }
 
   .kpi-cell {
-    background: #060606;
-    padding: 20px 16px;
+    border: 1px solid #e5e7eb;
+    padding: 14px 16px;
+    background: #fafafa;
   }
 
   .kpi-figure {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: normal;
-    color: #338302;
-    letter-spacing: -1px;
+    color: #111827;
+    letter-spacing: -0.2px;
     line-height: 1;
     margin-bottom: 6px;
   }
 
   .kpi-label {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
+    font-size: 10px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #000000;
+    color: #6b7280;
     margin-bottom: 2px;
   }
 
   .kpi-unit {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    color: #080808;
+    font-size: 10px;
+    color: #6b7280;
   }
 
   /* ---- data rows ---- */
@@ -198,98 +193,89 @@ const REPORT_STYLES = `
     justify-content: space-between;
     align-items: baseline;
     padding: 9px 0;
-    border-bottom: 1px solid #0f0f0f;
+    border-bottom: 1px solid #e5e7eb;
     gap: 24px;
   }
 
   .data-row:last-child { border-bottom: none; }
 
   .data-label {
-    color: #000000;
+    color: #111827;
     font-size: 12px;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.02em;
     flex-shrink: 0;
   }
 
   .data-value {
-    color: #000000;
+    color: #111827;
     font-size: 12px;
     text-align: right;
   }
 
-  .data-value.accent { color: #c8f0b0; }
-  .data-value.warn { color: #f0c878; }
+  .data-value.accent { font-weight: 600; }
+  .data-value.warn { font-weight: 600; }
 
   /* ---- alert box ---- */
   .alert {
-    border: 1px solid #2a2a1a;
-    background: #0d0d08;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
     padding: 14px 16px;
     margin-bottom: 8px;
   }
 
   .alert-name {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
+    font-size: 10px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #c8f0b0;
+    color: #111827;
     margin-bottom: 6px;
   }
 
   .alert-body {
     font-size: 12px;
-    color: #444;
-    line-height: 1.5;
+    color: #374151;
   }
 
   .alert-source {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    color: #2a2a2a;
+    font-size: 10px;
+    color: #6b7280;
     margin-top: 6px;
   }
 
   /* ---- heat pump warning ---- */
   .hp-warning {
-    border: 1px solid #3a2a0a;
-    background: #0d0a04;
+    border: 1px solid #f59e0b;
+    background: #fffbeb;
     padding: 14px 16px;
-    margin-bottom: 40px;
+    margin: 16px 0 18px;
   }
 
   .hp-warning-label {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
+    font-size: 10px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #f0c878;
+    color: #92400e;
     margin-bottom: 6px;
   }
 
   .hp-warning-body {
     font-size: 12px;
-    color: #555;
-    line-height: 1.5;
+    color: #78350f;
   }
 
   /* ---- narrative ---- */
   .narrative-section { margin-bottom: 28px; }
 
   .narrative-heading {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #333;
+    color: #111827;
     margin-bottom: 12px;
   }
 
   .narrative-body {
-    font-size: 13px;
-    color: #666;
-    line-height: 1.8;
+    font-size: 12.5px;
+    color: #111827;
   }
 
   .narrative-body p { margin-bottom: 12px; }
@@ -302,10 +288,10 @@ const REPORT_STYLES = `
 
   .risk-list li {
     font-size: 12px;
-    color: #555;
+    color: #374151;
     line-height: 1.6;
     padding: 6px 0;
-    border-bottom: 1px solid #0f0f0f;
+    border-bottom: 1px solid #e5e7eb;
     padding-left: 12px;
     position: relative;
   }
@@ -319,7 +305,7 @@ const REPORT_STYLES = `
 
   /* ---- footer ---- */
   .report-footer {
-    border-top: 1px solid #1a1a1a;
+    border-top: 1px solid #e5e7eb;
     padding-top: 24px;
     margin-top: 48px;
     display: flex;
@@ -328,17 +314,15 @@ const REPORT_STYLES = `
   }
 
   .footer-entropy {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #222;
+    color: #6b7280;
   }
 
   .footer-disclaimer {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    color: #1a1a1a;
+    font-size: 10px;
+    color: #6b7280;
     text-align: right;
     max-width: 200px;
     line-height: 1.4;
@@ -348,30 +332,38 @@ const REPORT_STYLES = `
   .compliance-row {
     display: flex;
     gap: 8px;
-    margin-bottom: 40px;
+    margin: 16px 0 18px;
     flex-wrap: wrap;
   }
 
   .badge {
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     padding: 5px 10px;
-    border: 1px solid #1a1a1a;
-    color: #333;
+    border: 1px solid #d1d5db;
+    color: #374151;
   }
 
   .badge.pass {
-    border-color: #1a3a0a;
-    color: #4a8a2a;
+    border-color: #16a34a;
+    color: #166534;
   }
 
   .badge.warn {
-    border-color: #3a2a0a;
-    color: #8a6a2a;
+    border-color: #f59e0b;
+    color: #92400e;
   }
 `
+
+const toTitleCase = (value) => {
+  if (!value) return ""
+  if (value === "uk") return "UK"
+  return value
+    .split("_")
+    .map(w => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .join(" ")
+}
 
 function generateReportHTML(result) {
   const f = result.calculated.financials
@@ -427,6 +419,142 @@ function generateReportHTML(result) {
 
   const risksHTML = riskLines.map(r => `<li>${r}</li>`).join("")
 
+  const headerHTML = `
+    <header class="report-header avoid-break">
+      <div class="entropy-mark">Entropy / Techno-Economic Analysis</div>
+      <h1 class="report-title">
+        ${specs.it_load_mw} MW ${toTitleCase(specs.cooling_type)} facility<br>
+        ${toTitleCase(specs.jurisdiction)} — ${toTitleCase(specs.heat_buyer_type)} offtake
+      </h1>
+      <div class="report-subtitle">Generated ${date} &nbsp;&nbsp;·&nbsp;&nbsp; ${toTitleCase(specs.user_type)}</div>
+    </header>
+  `
+
+  const kpisHTML = `
+    <div class="kpi-row avoid-break">
+      <div class="kpi-cell">
+        <div class="kpi-label">Payback period</div>
+        <div class="kpi-figure">${f.simple_payback_years}</div>
+        <div class="kpi-unit">years</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Annual revenue</div>
+        <div class="kpi-figure">${fmt(f.annual_heat_revenue)}</div>
+        <div class="kpi-unit">${cur} / year</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">CO₂ displaced</div>
+        <div class="kpi-figure">${fmt(f.tonnes_co2_displaced_annual)}</div>
+        <div class="kpi-unit">tonnes / year</div>
+      </div>
+    </div>
+  `
+
+  const complianceHTML = `
+    <div class="compliance-row avoid-break">
+      <div class="badge ${c.eu_eed_target_met ? "pass" : "warn"}">ERF ${c.erf_pct} — ${c.erf_band}</div>
+      <div class="badge ${c.eu_eed_target_met ? "pass" : "warn"}">EU EED ${c.eu_eed_target_met ? "compliant" : "below target"}</div>
+      <div class="badge">WUE ${c.wue_impact}</div>
+      <div class="badge">PUE ${c.pue_impact}</div>
+    </div>
+  `
+
+  const financialsHTML = `
+    <div class="section">
+      <div class="section-label">Financials — ${cur}</div>
+      ${[
+        ["Annual heat revenue",      fmt(f.annual_heat_revenue),     "accent"],
+        ["Annual carbon credits",    fmt(f.annual_carbon_credit),    "accent"],
+        ["Annual net benefit",       fmt(f.annual_net_benefit),      "accent"],
+        ["Heat exchanger CAPEX",     fmt(f.hex_capex),               ""],
+        p.heat_pump_required ? ["Heat pump CAPEX", fmt(f.heat_pump_capex), "warn"] : null,
+        ["Gross CAPEX",              fmt(f.gross_capex),             ""],
+        ["Grant value",              `(${fmt(f.grant_value)})`,      ""],
+        ["Net CAPEX after grants",   fmt(f.net_capex),               ""],
+        ["Annual maintenance OPEX",  fmt(f.annual_maintenance_opex), ""],
+        p.heat_pump_required ? ["Annual heat pump OPEX", fmt(f.annual_heat_pump_opex), "warn"] : null,
+        ["Annual total OPEX",        fmt(f.annual_total_opex),       ""],
+      ].filter(Boolean).map(([label, value, cls]) => `
+        <div class="data-row avoid-break">
+          <span class="data-label">${label}</span>
+          <span class="data-value ${cls}">${value}</span>
+        </div>`).join("")}
+    </div>
+  `
+
+  const physicsHTML = `
+    <div class="section">
+      <div class="section-label">Physics</div>
+      ${[
+        ["Total facility load",           `${fmt(p.total_facility_load_kw)} kW`],
+        ["Recoverable heat",              `${fmt(p.recoverable_heat_kw)} kW`],
+        ["Output temperature",            `${p.output_temp_c}°C`],
+        ["Buyer inlet required",          `${p.buyer_inlet_required_c}°C`],
+        ["Seasonal load factor",          `${(p.seasonal_load_factor * 100).toFixed(0)}%`],
+        ["Annual thermal energy",         `${fmt(p.annual_heat_mwh)} MWh`],
+        ["Energy Reuse Factor (ERF)",     p.erf_pct],
+      ].map(([label, value]) => `
+        <div class="data-row avoid-break">
+          <span class="data-label">${label}</span>
+          <span class="data-value">${value}</span>
+        </div>`).join("")}
+    </div>
+  `
+
+  const incentivesBlockHTML = `
+    <div class="section">
+      <div class="section-label">Incentives & Regulation</div>
+      ${incentivesHTML || `<div class="alert"><div class="alert-body">No incentives were applied.</div></div>`}
+    </div>
+  `
+
+  const analysisHTML = `
+    <div class="section">
+      <div class="section-label">Analysis</div>
+
+      <div class="narrative-section">
+        <div class="narrative-heading">Executive Summary</div>
+        <div class="narrative-body">
+          ${execParas.map(p => `<p>${p}</p>`).join("")}
+        </div>
+      </div>
+
+      <div class="narrative-section">
+        <div class="narrative-heading">Methodology</div>
+        <div class="narrative-body"><p>${methText}</p></div>
+      </div>
+
+      <div class="narrative-section">
+        <div class="narrative-heading">Risks & Assumptions</div>
+        <ul class="risk-list">${risksHTML}</ul>
+      </div>
+
+      ${ctaText ? `
+      <div class="narrative-section">
+        <div class="narrative-heading">Next Step</div>
+        <div class="narrative-body"><p>${ctaText}</p></div>
+      </div>` : ""}
+    </div>
+  `
+
+  const sourcesHTML = `
+    <div class="section">
+      <div class="section-label">Sources</div>
+      ${Object.entries(result.calculated.sources).map(([k, v]) => `
+        <div class="data-row avoid-break">
+          <span class="data-label">${k.replace(/_/g, " ")}</span>
+          <span class="data-value" style="font-size:11px;color:#374151;max-width:60%;text-align:right">${v}</span>
+        </div>`).join("")}
+    </div>
+  `
+
+  const footerHTML = `
+    <footer class="report-footer avoid-break">
+      <div class="footer-entropy">Entropy — entropy.energy</div>
+      <div class="footer-disclaimer">For informational purposes only. Not financial advice. Verify all figures independently.</div>
+    </footer>
+  `
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -435,126 +563,22 @@ function generateReportHTML(result) {
   <style>${REPORT_STYLES}</style>
 </head>
 <body>
-<div class="page">
-
-  <header class="report-header">
-    <div class="entropy-mark">Entropy / Techno-Economic Analysis</div>
-    <h1 class="report-title">${specs.it_load_mw} MW ${specs.cooling_type.replace(/_/g, " ")} facility<br>${specs.jurisdiction.charAt(0).toUpperCase() + specs.jurisdiction.slice(1)} — ${specs.heat_buyer_type.replace(/_/g, " ")} offtake</h1>
-    <div class="report-subtitle">Generated ${date} &nbsp;&nbsp;·&nbsp;&nbsp; ${specs.user_type.replace(/_/g, " ")}</div>
-  </header>
-
-  <div class="kpi-row">
-    <div class="kpi-cell">
-      <div class="kpi-label">Payback period</div>
-      <div class="kpi-figure">${f.simple_payback_years}</div>
-      <div class="kpi-unit">years</div>
-    </div>
-    <div class="kpi-cell">
-      <div class="kpi-label">Annual revenue</div>
-      <div class="kpi-figure">${fmt(f.annual_heat_revenue)}</div>
-      <div class="kpi-unit">${cur} / year</div>
-    </div>
-    <div class="kpi-cell">
-      <div class="kpi-label">CO₂ displaced</div>
-      <div class="kpi-figure">${fmt(f.tonnes_co2_displaced_annual)}</div>
-      <div class="kpi-unit">tonnes / year</div>
-    </div>
+  <div class="pdf-page">
+    ${headerHTML}
+    ${kpisHTML}
+    ${complianceHTML}
+    ${heatPumpBlock}
+    ${financialsHTML}
   </div>
 
-  <div class="compliance-row">
-    <div class="badge ${c.eu_eed_target_met ? "pass" : "warn"}">ERF ${c.erf_pct} — ${c.erf_band}</div>
-    <div class="badge ${c.eu_eed_target_met ? "pass" : "warn"}">EU EED ${c.eu_eed_target_met ? "compliant" : "below target"}</div>
-    <div class="badge">WUE ${c.wue_impact}</div>
-    <div class="badge">PUE ${c.pue_impact}</div>
+  <div class="pdf-page">
+    ${headerHTML}
+    ${physicsHTML}
+    ${incentivesBlockHTML}
+    ${analysisHTML}
+    ${sourcesHTML}
+    ${footerHTML}
   </div>
-
-  ${heatPumpBlock}
-
-  <div class="section">
-    <div class="section-label">Financials — ${cur}</div>
-    ${[
-      ["Annual heat revenue",      fmt(f.annual_heat_revenue),     "accent"],
-      ["Annual carbon credits",    fmt(f.annual_carbon_credit),    "accent"],
-      ["Annual net benefit",       fmt(f.annual_net_benefit),      "accent"],
-      ["Heat exchanger CAPEX",     fmt(f.hex_capex),               ""],
-      p.heat_pump_required ? ["Heat pump CAPEX", fmt(f.heat_pump_capex), "warn"] : null,
-      ["Gross CAPEX",              fmt(f.gross_capex),             ""],
-      ["Grant value",              `(${fmt(f.grant_value)})`,      ""],
-      ["Net CAPEX after grants",   fmt(f.net_capex),               ""],
-      ["Annual maintenance OPEX",  fmt(f.annual_maintenance_opex), ""],
-      p.heat_pump_required ? ["Annual heat pump OPEX", fmt(f.annual_heat_pump_opex), "warn"] : null,
-      ["Annual total OPEX",        fmt(f.annual_total_opex),       ""],
-    ].filter(Boolean).map(([label, value, cls]) => `
-      <div class="data-row">
-        <span class="data-label">${label}</span>
-        <span class="data-value ${cls}">${value}</span>
-      </div>`).join("")}
-  </div>
-
-  <div class="section">
-    <div class="section-label">Physics</div>
-    ${[
-      ["Total facility load",           `${fmt(p.total_facility_load_kw)} kW`],
-      ["Recoverable heat",              `${fmt(p.recoverable_heat_kw)} kW`],
-      ["Output temperature",            `${p.output_temp_c}°C`],
-      ["Buyer inlet required",          `${p.buyer_inlet_required_c}°C`],
-      ["Seasonal load factor",          `${(p.seasonal_load_factor * 100).toFixed(0)}%`],
-      ["Annual thermal energy",         `${fmt(p.annual_heat_mwh)} MWh`],
-      ["Energy Reuse Factor (ERF)",     p.erf_pct],
-    ].map(([label, value]) => `
-      <div class="data-row">
-        <span class="data-label">${label}</span>
-        <span class="data-value">${value}</span>
-      </div>`).join("")}
-  </div>
-
-  <div class="section">
-    <div class="section-label">Incentives & Regulation</div>
-    ${incentivesHTML}
-  </div>
-
-  <div class="section">
-    <div class="section-label">Analysis</div>
-
-    <div class="narrative-section">
-      <div class="narrative-heading">Executive Summary</div>
-      <div class="narrative-body">
-        ${execParas.map(p => `<p>${p}</p>`).join("")}
-      </div>
-    </div>
-
-    <div class="narrative-section">
-      <div class="narrative-heading">Methodology</div>
-      <div class="narrative-body"><p>${methText}</p></div>
-    </div>
-
-    <div class="narrative-section">
-      <div class="narrative-heading">Risks & Assumptions</div>
-      <ul class="risk-list">${risksHTML}</ul>
-    </div>
-
-    ${ctaText ? `
-    <div class="narrative-section">
-      <div class="narrative-heading">Next Step</div>
-      <div class="narrative-body"><p>${ctaText}</p></div>
-    </div>` : ""}
-  </div>
-
-  <div class="section">
-    <div class="section-label">Sources</div>
-    ${Object.entries(result.calculated.sources).map(([k, v]) => `
-      <div class="data-row">
-        <span class="data-label">${k.replace(/_/g, " ")}</span>
-        <span class="data-value" style="font-size:11px;color:#333;max-width:60%;text-align:right">${v}</span>
-      </div>`).join("")}
-  </div>
-
-  <footer class="report-footer">
-    <div class="footer-entropy">Entropy — entropy.energy</div>
-    <div class="footer-disclaimer">For informational purposes only. Not financial advice. Verify all figures independently.</div>
-  </footer>
-
-</div>
 </body>
 </html>`
 }
@@ -569,7 +593,7 @@ const handleExport = async () => {
   // 1. Write the report HTML into a hidden iframe so it renders fully
   const html = generateReportHTML(result)
   const iframe = document.createElement("iframe")
-  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:794px;height:1123px;border:none;"
+  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:794px;height:10000px;border:none;"
   document.body.appendChild(iframe)
 
   iframe.contentDocument.open()
@@ -579,73 +603,36 @@ const handleExport = async () => {
   // 2. Wait for fonts and layout to settle
   await new Promise(res => setTimeout(res, 800))
 
-  const iframeBody = iframe.contentDocument.body
-  const totalHeight = iframeBody.scrollHeight
+  const pages = Array.from(iframe.contentDocument.querySelectorAll(".pdf-page"))
 
-  // 3. Render to canvas at 2x for sharpness
-  const canvas = await html2canvas(iframeBody, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-    width: 794,
-    height: totalHeight,
-    windowWidth: 794,
-    windowHeight: totalHeight,
-  })
+  const pageW = 210
+  let pdf = null
+
+  for (let i = 0; i < pages.length; i++) {
+    const pageEl = pages[i]
+    const naturalH = pageEl.scrollHeight
+    const canvas = await html2canvas(pageEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      width: 794,
+      height: naturalH,
+      windowWidth: 794,
+      windowHeight: naturalH,
+    })
+
+    const imgH = Math.ceil(pageW * canvas.height / canvas.width)
+    if (i === 0) {
+      pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, imgH] })
+    } else {
+      pdf.addPage([pageW, imgH])
+    }
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageW, imgH)
+  }
 
   document.body.removeChild(iframe)
 
-  // 4. Build PDF — A4 size, split across pages cleanly
-  // 4. Build PDF — A4 with margins on every page
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  })
-
-  const pageW = 210
-  const pageH = 297
-  const marginY = 12  // top and bottom margin in mm
-  const marginX = 0
-
-  const imgW = pageW - marginX * 2
-  const contentH = pageH - marginY * 2  // usable height per page in mm
-
-  // How many canvas pixels fit in one page's content area?
-  const pxPerMm = canvas.width / imgW
-  const contentPxPerPage = contentH * pxPerMm
-
-  const totalPages = Math.ceil(canvas.height / contentPxPerPage)
-
-  for (let i = 0; i < totalPages; i++) {
-    if (i > 0) pdf.addPage()
-
-    // Slice the canvas vertically for this page
-    const srcY = Math.round(i * contentPxPerPage)
-    const srcH = Math.min(contentPxPerPage, canvas.height - srcY)
-
-    const sliceCanvas = document.createElement("canvas")
-    sliceCanvas.width = canvas.width
-    sliceCanvas.height = Math.round(contentPxPerPage)
-
-    const ctx = sliceCanvas.getContext("2d")
-    ctx.fillStyle = "#060606"
-    ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height)
-    ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH)
-
-    const sliceH = (sliceCanvas.height / pxPerMm)
-
-    pdf.addImage(
-      sliceCanvas.toDataURL("image/png"),
-      "PNG",
-      marginX,
-      marginY,       // top margin on every page
-      imgW,
-      sliceH
-    )
-  }
-
-  // 5. Open in browser as blob URL — no download, no print dialog
+  // Open in browser as blob URL — no download, no print dialog
   const blob = pdf.output("blob")
   const url = URL.createObjectURL(blob)
   window.open(url, "_blank")

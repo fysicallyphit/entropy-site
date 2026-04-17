@@ -1,4 +1,6 @@
 import { useState } from "react"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 const STEPS = [
   { id: "parties",   label: "Parties",   num: "01" },
@@ -12,6 +14,160 @@ const STEPS = [
 const JURISDICTIONS = ["germany", "uk", "denmark", "netherlands", "sweden"]
 const COOLING_TYPES = ["air_cooled", "direct_liquid", "immersion"]
 const HEAT_BUYER_TYPES = ["district_heating", "industrial", "greenhouse_horticulture", "industrial_process"]
+
+const toTitleCase = (value) => {
+  if (!value) return ""
+  if (value === "uk") return "UK"
+  return value
+    .split("_")
+    .map(w => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .join(" ")
+}
+
+const escapeHtml = (str) =>
+  String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+
+const HPA_DOC_STYLES = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: #111827;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .pdf-page { width: 794px; min-height: 1123px; margin: 0 auto; padding: 54px 54px 56px; background: #ffffff; }
+  .pdf-page + .pdf-page { page-break-before: always; }
+  .doc-topline { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #374151; margin-bottom: 14px; }
+  .doc-title { font-size: 22px; font-weight: normal; letter-spacing: -0.2px; margin-bottom: 10px; }
+  .doc-subtitle { font-size: 11px; color: #374151; }
+  .rule { height: 1px; background: #d1d5db; margin: 18px 0 22px; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-bottom: 18px; }
+  .meta-item { font-size: 11px; color: #111827; }
+  .meta-k { display: block; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
+  .meta-v { display: block; }
+  .section { margin-top: 18px; }
+  .h { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #111827; margin-bottom: 10px; }
+  .p { margin-bottom: 10px; color: #111827; }
+  .mono { font-family: "Courier New", Courier, monospace; font-size: 11px; }
+  .terms { border: 1px solid #e5e7eb; padding: 14px 16px; background: #fafafa; }
+  .terms-row { display: flex; justify-content: space-between; gap: 24px; padding: 7px 0; border-bottom: 1px solid #e5e7eb; }
+  .terms-row:last-child { border-bottom: none; }
+  .terms-k { color: #374151; }
+  .terms-v { color: #111827; text-align: right; }
+  .narrative { white-space: pre-wrap; }
+  .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; }
+  .sig { border-top: 1px solid #9ca3af; padding-top: 10px; }
+  .sig small { display: block; color: #6b7280; margin-top: 6px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .footer { margin-top: 26px; padding-top: 14px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #6b7280; display:flex; justify-content: space-between; gap: 16px; }
+`
+
+function generateHPADocHTML(result) {
+  const c = result.calculated
+  const inp = result._input || {}
+  const rawParties = c.parties || {}
+  const p = {
+    seller_name:    rawParties.seller_name    || inp.seller_name    || "",
+    buyer_name:     rawParties.buyer_name     || inp.buyer_name     || "",
+    governing_law:  rawParties.governing_law  || inp.governing_law  || "",
+    heat_buyer_type:rawParties.heat_buyer_type|| inp.heat_buyer_type|| "",
+    cooling_type:   rawParties.cooling_type   || inp.cooling_type   || "",
+    term_years:     rawParties.term_years     || inp.term_years     || "",
+    currency:       rawParties.currency       || inp.currency       || "€",
+  }
+  const cap = c.capacity_and_volume
+  const fin = c.financials
+  const short = c.shortfall
+  const date = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })
+
+  const safeNarrative = escapeHtml(result.narrative)
+
+  const row = (k, v) => `
+    <div class="terms-row">
+      <div class="terms-k">${escapeHtml(k)}</div>
+      <div class="terms-v">${escapeHtml(v)}</div>
+    </div>
+  `
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Entropy — Heat Purchasing Agreement (Indicative)</title>
+  <style>${HPA_DOC_STYLES}</style>
+</head>
+<body>
+  <div class="pdf-page">
+    <div class="doc-topline">Entropy / Heat Purchasing Agreement</div>
+    <div class="doc-title">Indicative Heat Purchasing Agreement Term Sheet</div>
+    <div class="doc-subtitle">Generated ${escapeHtml(date)} · For discussion purposes only</div>
+    <div class="rule"></div>
+
+    <div class="meta">
+      <div class="meta-item"><span class="meta-k">Seller</span><span class="meta-v">${escapeHtml(p.seller_name)}</span></div>
+      <div class="meta-item"><span class="meta-k">Buyer</span><span class="meta-v">${escapeHtml(p.buyer_name)}</span></div>
+      <div class="meta-item"><span class="meta-k">Jurisdiction</span><span class="meta-v">${escapeHtml(toTitleCase(p.jurisdiction))}</span></div>
+      <div class="meta-item"><span class="meta-k">Governing Law</span><span class="meta-v">${escapeHtml(toTitleCase(p.governing_law))}</span></div>
+      <div class="meta-item"><span class="meta-k">Heat Buyer Type</span><span class="meta-v">${escapeHtml(toTitleCase(p.heat_buyer_type))}</span></div>
+      <div class="meta-item"><span class="meta-k">Cooling Technology</span><span class="meta-v">${escapeHtml(toTitleCase(p.cooling_type))}</span></div>
+    </div>
+
+    <div class="section">
+      <div class="h">Commercial Terms (Summary)</div>
+      <div class="terms">
+        ${row("Contracted Capacity", `${cap.contracted_capacity_mw} MW`)}
+        ${row("Availability Guarantee", `${cap.availability_guarantee_pct}%`)}
+        ${row("Guaranteed Minimum Volume", `${Number(cap.guaranteed_min_mwh_year).toLocaleString()} MWh / year`)}
+        ${row("Agreement Term", `${p.term_years} years`)}
+        ${row("Annual Total Revenue", `${p.currency} ${Number(fin.annual_total_revenue).toLocaleString()}`)}
+        ${row("Total Contract Value (Undiscounted)", `${p.currency} ${Number(fin.total_contract_value_undiscounted).toLocaleString()}`)}
+        ${row("Shortfall Rate", `${p.currency} ${short.shortfall_rate_eur_mwh}/MWh`)}
+      </div>
+    </div>
+  </div>
+
+  <div class="pdf-page">
+    <div class="doc-topline">Entropy / Heat Purchasing Agreement</div>
+    <div class="doc-title">Indicative Term Sheet (Narrative)</div>
+    <div class="doc-subtitle">${escapeHtml(p.seller_name)} and ${escapeHtml(p.buyer_name)}</div>
+    <div class="rule"></div>
+
+    <div class="section">
+      <div class="terms">
+        <div class="narrative">${safeNarrative}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="h">Signatures (Indicative)</div>
+      <div class="sig-grid">
+        <div>
+          <div class="sig"></div>
+          <small>For and on behalf of Seller</small>
+          <div class="mono">${escapeHtml(p.seller_name)}</div>
+        </div>
+        <div>
+          <div class="sig"></div>
+          <small>For and on behalf of Buyer</small>
+          <div class="mono">${escapeHtml(p.buyer_name)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Entropy — Indicative term sheet</div>
+      <div>Not legal advice. Subject to definitive documentation.</div>
+    </div>
+  </div>
+</body>
+</html>`
+}
 
 const FIELD_STYLES = `
   .wiz-field { margin-bottom: 20px; }
@@ -51,6 +207,8 @@ const FIELD_STYLES = `
   .ts-btn-copy:hover { border-color: #475569; background: #1e293b; }
   .ts-btn-new { background: linear-gradient(135deg, #4f46e5, #4338ca); border: none; color: #ffffff; }
   .ts-btn-new:hover { opacity: 0.9; }
+  .ts-btn-export { background: #0f172a; border: 1px solid #334155; color: #cbd5e1; }
+  .ts-btn-export:hover { border-color: #475569; background: #1e293b; }
   .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
   .metric-cell { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; }
   .metric-label { font-size: 10px; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
@@ -112,16 +270,16 @@ function StepParties({ data, set }) {
       <div className="wiz-row">
         <Field label="Jurisdiction">
           <Select value={data.jurisdiction} onChange={v => set("jurisdiction", v)}
-            options={JURISDICTIONS.map(j => ({ value: j, label: j.charAt(0).toUpperCase() + j.slice(1) }))} />
+            options={JURISDICTIONS.map(j => ({ value: j, label: toTitleCase(j) }))} />
         </Field>
         <Field label="Heat Buyer Type">
           <Select value={data.heat_buyer_type} onChange={v => set("heat_buyer_type", v)}
-            options={HEAT_BUYER_TYPES.map(t => ({ value: t, label: t.replace(/_/g, " ") }))} />
+            options={HEAT_BUYER_TYPES.map(t => ({ value: t, label: toTitleCase(t) }))} />
         </Field>
       </div>
       <Field label="Cooling Technology">
         <Select value={data.cooling_type} onChange={v => set("cooling_type", v)}
-          options={COOLING_TYPES.map(t => ({ value: t, label: t.replace(/_/g, " ") }))} />
+          options={COOLING_TYPES.map(t => ({ value: t, label: toTitleCase(t) }))} />
       </Field>
     </>
   )
@@ -242,15 +400,15 @@ function StepReview({ data }) {
         <div className="review-group-title">Parties</div>
         <ReviewRow label="Seller" value={data.seller_name || "—"} />
         <ReviewRow label="Buyer" value={data.buyer_name || "—"} />
-        <ReviewRow label="Jurisdiction" value={data.jurisdiction} />
-        <ReviewRow label="Buyer Type" value={data.heat_buyer_type.replace(/_/g, " ")} />
+        <ReviewRow label="Jurisdiction" value={toTitleCase(data.jurisdiction)} />
+        <ReviewRow label="Buyer Type" value={toTitleCase(data.heat_buyer_type)} />
       </div>
       <div className="review-group">
         <div className="review-group-title">Capacity</div>
         <ReviewRow label="Contracted Capacity" value={`${data.contracted_capacity_mw} MW`} />
         <ReviewRow label="Availability Guarantee" value={`${data.availability_guarantee_pct}%`} />
         <ReviewRow label="Guaranteed Min Volume" value={`${minMwh.toLocaleString()} MWh/year`} />
-        <ReviewRow label="Cooling Type" value={data.cooling_type.replace(/_/g, " ")} />
+        <ReviewRow label="Cooling Type" value={toTitleCase(data.cooling_type)} />
       </div>
       <div className="review-group">
         <div className="review-group-title">Pricing</div>
@@ -276,6 +434,52 @@ function TermSheet({ result, onReset }) {
   const currency = c.parties.currency
 
   const fmt = n => Number(n).toLocaleString()
+
+  const handleExport = async () => {
+    const html = generateHPADocHTML(result)
+    const iframe = document.createElement("iframe")
+    iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:794px;height:10000px;border:none;"
+    document.body.appendChild(iframe)
+
+    iframe.contentDocument.open()
+    iframe.contentDocument.write(html)
+    iframe.contentDocument.close()
+
+    await new Promise(res => setTimeout(res, 800))
+
+    const pages = Array.from(iframe.contentDocument.querySelectorAll(".pdf-page"))
+
+    const pageW = 210
+    let pdf = null
+
+    for (let i = 0; i < pages.length; i++) {
+      const pageEl = pages[i]
+      const naturalH = pageEl.scrollHeight
+      const canvas = await html2canvas(pageEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        width: 794,
+        height: naturalH,
+        windowWidth: 794,
+        windowHeight: naturalH,
+      })
+
+      const imgH = Math.ceil(pageW * canvas.height / canvas.width)
+      if (i === 0) {
+        pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, imgH] })
+      } else {
+        pdf.addPage([pageW, imgH])
+      }
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageW, imgH)
+    }
+
+    document.body.removeChild(iframe)
+
+    const blob = pdf.output("blob")
+    const url = URL.createObjectURL(blob)
+    window.open(url, "_blank")
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(result.narrative)
@@ -317,6 +521,9 @@ function TermSheet({ result, onReset }) {
       <div className="term-sheet-actions">
         <button className="ts-btn ts-btn-copy" onClick={handleCopy}>
           {copied ? "Copied" : "Copy text"}
+        </button>
+        <button className="ts-btn ts-btn-export" onClick={handleExport}>
+          Export PDF
         </button>
         <button className="ts-btn ts-btn-new" onClick={onReset}>
           New agreement
@@ -380,7 +587,7 @@ export default function HPAWizard() {
         body: JSON.stringify(payload),
       })
       const json = await res.json()
-      setResult(json)
+      setResult({ ...json, _input: payload })
     } catch (e) {
       setError("Failed to generate term sheet. Is the server running?")
     }
