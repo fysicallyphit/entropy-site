@@ -135,7 +135,6 @@ h1 {
   line-height: 1.1;
   color: var(--white);
   margin-bottom: 2rem;
-  white-space: nowrap;
 }
 
 h2 {
@@ -395,10 +394,67 @@ input:hover, textarea:hover {
 }
 
 @media (max-width: 640px) {
-  nav { padding: 0 1.5rem; }
-  section { padding: 6rem 1.5rem; }
-  .nav-links { gap: 1.5rem; }
-  .grid { grid-template-columns: 1fr; }
-  .grid-item { border-right: none; }
-  footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+  nav {
+    padding: 0 1.25rem;
+    height: 52px;
+  }
+
+  .nav-logo {
+    width: auto;
+    height: 28px;
+    margin-top: 0;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .nav-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+  }
+
+  main {
+    padding-top: 52px;
+  }
+
+  section {
+    padding: 4rem 1.25rem;
+    min-height: auto;
+  }
+
+  .hero {
+    padding-top: 5rem;
+    min-height: 100svh;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 9vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  h3 {
+    font-size: 0.92rem;
+    max-width: none;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+  }
+
+  .grid-item {
+    border-right: none;
+  }
+
+  form {
+    max-width: 100%;
+  }
+
+  footer {
+    padding: 1.5rem 1.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
 }
