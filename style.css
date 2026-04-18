@@ -401,8 +401,8 @@ input:hover, textarea:hover {
   }
 
   .nav-logo {
-    height: 30px;
-    width: 110px;
+    width: auto;
+    height: 32px;
     margin-top: 0;
   }
 
