@@ -404,6 +404,7 @@ input:hover, textarea:hover {
     width: auto;
     height: 28px;
     margin-top: 0;
+    padding-left: -0.5rem;
   }
 
   .nav-links {
